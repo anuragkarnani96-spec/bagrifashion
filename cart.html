@@ -5,32 +5,118 @@
   <title>Your Cart - B.F. Fashion</title>
   <link rel="stylesheet" href="demobagri.css">
   <style>
-    form {
-      margin-top: 40px;
-      text-align: left;
-      display: inline-block;
-      background-color: #fff;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-    input, textarea {
-      width: 100%;
-      padding: 8px;
-      margin: 8px 0;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-    }
-    button {
+    /* ===== HEADER ===== */
+    .header {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      align-items: center;
       background-color: maroon;
       color: white;
-      border: none;
-      padding: 10px 16px;
-      border-radius: 8px;
-      cursor: pointer;
+      padding: 10px 20px;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
     }
-    button:hover {
-      background-color: darkred;
+
+    .logo-left img {
+      width: 60px;
+      height: 60px;
+    }
+
+    .title-center {
+      text-align: center;
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    .cart-right {
+      text-align: right;
+    }
+
+    .cart-btn {
+      text-decoration: none;
+      color: maroon;
+      background-color: gold;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-weight: bold;
+    }
+
+    /* ===== CART CONTENT ===== */
+    .cart-container {
+      max-width: 900px;
+      margin: 30px auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    .cart-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #ddd;
+      padding: 10px 0;
+    }
+
+    .cart-item img {
+      width: 80px;
+      height: 100px;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+
+    .cart-item-details {
+      flex: 1;
+      margin-left: 15px;
+    }
+
+    .cart-item h3 {
+      margin: 0;
+      font-size: 18px;
+    }
+
+    .cart-item p {
+      margin: 5px 0;
+    }
+
+    .remove-btn {
+      background: darkred;
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .remove-btn:hover {
+      background: red;
+    }
+
+    .total {
+      text-align: right;
+      font-size: 20px;
+      font-weight: bold;
+      margin-top: 20px;
+    }
+
+    .order-btn {
+      display: block;
+      text-align: center;
+      background: green;
+      color: white;
+      padding: 12px 16px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-size: 18px;
+      margin-top: 20px;
+      transition: 0.3s;
+    }
+
+    .order-btn:hover {
+      background: darkgreen;
     }
   </style>
 </head>
@@ -39,129 +125,78 @@
   <!-- ===== HEADER ===== -->
   <header class="header">
     <div class="logo-left">
-      <img src="logojmb.jpg" width="60" height="60">
+      <img src="images/logojmb.jpg" alt="Logo">
     </div>
 
     <div class="title-center">
-      <h1>Your Cart</h1>
+      <h1>B.F. Fashion</h1>
     </div>
 
     <div class="cart-right">
-      <a href="index.html" class="cart-btn">← Back to Shop</a>
+      <a href="index.html" class="cart-btn">🏠 Home</a>
     </div>
   </header>
 
-  <!-- ===== CART ===== -->
-  <main style="text-align:center; margin:40px;">
+  <!-- ===== CART BODY ===== -->
+  <div class="cart-container">
+    <h2>Your Cart</h2>
     <div id="cart-items"></div>
-    <h2 id="total"></h2>
+    <div class="total">Total: ₹<span id="total-price">0</span></div>
+    <a id="order-link" href="#" class="order-btn">📦 Place Order on WhatsApp</a>
+  </div>
 
-    <button id="clear-cart" class="add-to-cart">Clear Cart</button>
-
-    <div id="order-section" style="display:none;">
-      <h2>🧾 Place Your Order</h2>
-      <form id="order-form">
-        <label>Full Name:</label>
-        <input type="text" id="name" required>
-
-        <label>Phone Number:</label>
-        <input type="tel" id="phone" required pattern="[0-9]{10}" maxlength="10">
-
-        <label>Delivery Address:</label>
-        <textarea id="address" rows="4"></textarea>
-
-        <button type="submit">Place Order on WhatsApp</button>
-      </form>
-      <p id="success" style="color:green; font-weight:bold; margin-top:10px;"></p>
-    </div>
-  </main>
-
-  <!-- ===== SCRIPT ===== -->
   <script>
     let cart = JSON.parse(localStorage.getItem("cart")) || [];
-    const cartItemsDiv = document.getElementById("cart-items");
-    const totalElement = document.getElementById("total");
-    const orderSection = document.getElementById("order-section");
+    const cartContainer = document.getElementById("cart-items");
+    const totalPriceElement = document.getElementById("total-price");
+    const orderLink = document.getElementById("order-link");
 
-    function renderCart() {
-      cartItemsDiv.innerHTML = "";
+    function displayCart() {
+      cartContainer.innerHTML = "";
+      let total = 0;
+
       if (cart.length === 0) {
-        cartItemsDiv.innerHTML = "<h2>Your cart is empty 🛒</h2>";
-        totalElement.textContent = "";
-        orderSection.style.display = "none";
+        cartContainer.innerHTML = "<p>Your cart is empty.</p>";
+        totalPriceElement.textContent = "0";
         return;
       }
 
-      let total = 0;
       cart.forEach((item, index) => {
         total += item.price;
-        cartItemsDiv.innerHTML += `
-          <div style="margin:10px; border:1px solid #ddd; padding:10px; border-radius:10px; display:inline-block;">
-            <img src="${item.img}" width="100" height="100"><br>
-            <b>${item.name}</b><br>₹${item.price}<br>
-            <button onclick="removeItem(${index})" class="add-to-cart">Remove</button>
+        const div = document.createElement("div");
+        div.classList.add("cart-item");
+        div.innerHTML = `
+          <img src="${item.img}" alt="${item.name}">
+          <div class="cart-item-details">
+            <h3>${item.name}</h3>
+            <p>₹${item.price}</p>
           </div>
+          <button class="remove-btn" onclick="removeItem(${index})">Remove</button>
         `;
+        cartContainer.appendChild(div);
       });
 
-      totalElement.textContent = "Total: ₹" + total;
-      orderSection.style.display = "block";
+      totalPriceElement.textContent = total;
+      updateWhatsAppLink(total);
     }
 
     function removeItem(index) {
       cart.splice(index, 1);
       localStorage.setItem("cart", JSON.stringify(cart));
-      renderCart();
+      displayCart();
     }
 
-    document.getElementById("clear-cart").addEventListener("click", () => {
-      localStorage.removeItem("cart");
-      cart = [];
-      renderCart();
-    });
+    function updateWhatsAppLink(total) {
+      const message = encodeURIComponent(
+        "🛍️ *New Order from B.F. Fashion*\n\n" +
+        cart.map(i => `${i.name} - ₹${i.price}`).join("\n") +
+        `\n\nTotal: ₹${total}\n\nPlease confirm my order.`
+      );
+      orderLink.href = `https://wa.me/919374833385?text=${message}`;
+    }
 
-    // Handle Order Form + WhatsApp Send
-    document.getElementById("order-form").addEventListener("submit", (e) => {
-      e.preventDefault();
-      const name = document.getElementById("name").value.trim();
-      const phone = document.getElementById("phone").value.trim();
-      const address = document.getElementById("address").value.trim();
-
-      if (cart.length === 0) {
-        alert("Your cart is empty!");
-        return;
-      }
-
-      let message = `*🛍️ New Order *\n\n`;
-      message += `*Customer:* ${name}\n`;
-      message += `*Phone:* ${phone}\n`;
-      message += `*Address:* ${address}\n\n`;
-      message += `*Order Details:*\n`;
-
-      let total = 0;
-      cart.forEach((item) => {
-        message += `- ${item.name} — ₹${item.price}\n`;
-        total += item.price;
-      });
-
-      message += `\n*Total:* ₹${total}\n\n`;
-
-      // your WhatsApp number (include country code, no +)
-      const whatsappNumber = "919316149804"; // ← change if needed
-      const encodedMessage = encodeURIComponent(message);
-      const whatsappURL = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
-
-      // Open WhatsApp
-      window.open(whatsappURL, "_blank");
-
-      // Clear cart after sending
-      document.getElementById("success").textContent = "✅ Order sent on WhatsApp!";
-      localStorage.removeItem("cart");
-      cart = [];
-      renderCart();
-    });
-
-    renderCart();
+    displayCart();
   </script>
+
 </body>
 </html>
