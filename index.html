@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>B.F. Fashion</title>
+  <link rel="stylesheet" href="demobagri.css">
+  <style>
+    /* ===== Sticky Header ===== */
+    .header {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+
+    /* ===== Product Styling ===== */
+    .product {
+      display: inline-block;
+      text-align: center;
+      margin: 20px;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      padding: 10px;
+      width: 300px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      background: #fff;
+    }
+
+    .product img {
+      width: 100%;
+      height: 350px;
+      border-radius: 10px;
+      object-fit: cover;
+      transition: transform 0.3s ease;
+    }
+
+    .product img:hover {
+      transform: scale(1.03);
+    }
+
+    .add-to-cart {
+      background-color: maroon;
+      color: white;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: 0.3s;
+    }
+
+    .add-to-cart:hover {
+      background-color: darkred;
+      transform: scale(1.05);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ===== HEADER ===== -->
+  <header class="header">
+    <div class="logo-left">
+      <img src="logojmb.jpg" width="60" height="60">
+    </div>
+
+    <div class="title-center">
+      <h1>B.F. Fashion</h1>
+    </div>
+
+    <div class="cart-right">
+      <a href="cart.html" class="cart-btn">🛒 Cart (<span id="cart-count">0</span>)</a>
+    </div>
+  </header>
+
+  <!-- ===== PRODUCTS ===== -->
+  <main style="text-align:center; margin-top:20px;">
+
+    <!-- Product 1 -->
+    <div class="product">
+      <img id="img1" src="LGBEHAPPY.JPG" alt="GIRL T SHIRT">
+      <h3>GIRL T SHIRT </h3>
+      <p>₹799</p>
+      <button class="add-to-cart" onclick="addToCart('GIRL T SHIRT', 799, 'LGBEHAPPY.JPG')">Add to Cart</button>
+    </div>
+
+    <!-- Product 2 -->
+    <div class="product">
+      <img id="img2" src="bj.jpg" alt="Jacket">
+      <h3>Jacket</h3>
+      <p>₹899</p>
+      <button class="add-to-cart" onclick="addToCart('Jacket', 899, 'img2')">Add to Cart</button>
+    </div>
+
+    <!-- Product 3 -->
+    <div class="product">
+      <img id="img3" src="bnd.jpg" alt="Night dress">
+      <h3>Night Dress Co-Set</h3>
+      <p>₹699</p>
+      <button class="add-to-cart" onclick="addToCart('Night dress Co-set', 699, 'bnd')">Add to Cart</button>
+    </div>
+
+  </main>
+
+  <!-- ===== FOOTER ===== -->
+  <footer style="text-align:center; padding:20px;">
+    Contact us:<br>
+    📞 9374833385 / 7201010785
+  </footer>
+
+  <!-- ===== FLOATING WHATSAPP BUTTON ===== -->
+  <a href="https://wa.me/919316149804" class="whatsapp-float" target="_blank">💬</a>
+
+  <!-- ===== SCRIPT ===== -->
+  <script>
+    // === CART COUNT HANDLER ===
+    let cart = JSON.parse(localStorage.getItem("cart")) || [];
+    const countSpan = document.getElementById("cart-count");
+    countSpan.textContent = cart.length;
+
+    function addToCart(name, price, img) {
+      cart.push({ name, price, img });
+      localStorage.setItem("cart", JSON.stringify(cart));
+      countSpan.textContent = cart.length;
+      alert(name + " added to cart!");
+    }
+
+    // === AUTO IMAGE SLIDESHOW WITH PAUSE ON HOVER ===
+    const productSlides = {
+      img1: ["LGBEHAPPY.JPG", "MBEHAPPY.JPG", "NBBEHAPPY.JPG"],
+      img2: ["nbj.jpg", "wj.jpg", "bj.jpg", "pj.jpg", "afj.jpg"],
+      img3: ["lgnd.jpg", "lnds.jpg", "ond.jpg", "pnds.jpg", "wnd.jpg", "mnd.jpg", "bnd.jpg"]
+    };
+
+    const intervals = {};
+
+    function startSlides() {
+      for (const id in productSlides) {
+        let i = 0;
+        const img = document.getElementById(id);
+        intervals[id] = setInterval(() => {
+          i = (i + 1) % productSlides[id].length;
+          img.src = productSlides[id][i];
+        }, 3000);
+
+        // Pause on hover
+        img.addEventListener("mouseenter", () => clearInterval(intervals[id]));
+        img.addEventListener("mouseleave", () => {
+          intervals[id] = setInterval(() => {
+            i = (i + 1) % productSlides[id].length;
+            img.src = productSlides[id][i];
+          }, 3000);
+        });
+      }
+    }
+
+    startSlides();
+  </script>
+</body>
+</html>
