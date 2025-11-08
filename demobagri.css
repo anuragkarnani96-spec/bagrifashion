@@ -35,6 +35,12 @@ body {
   font-size: 24px;
   font-weight: bold;
 }
+.contacts-right {
+  text-align: right;
+}
+.inmfo {
+  text-align: left;
+}
 
 .cart-right {
   text-align: right;
@@ -262,3 +268,4 @@ footer {
     text-align: center;
   }
 }
+
