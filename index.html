@@ -1,159 +1,255 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>B.F. Fashion</title>
-  <link rel="stylesheet" href="demobagri.css">
-  <style>
-    /* ===== Sticky Header ===== */
-    .header {
-      position: sticky;
-      top: 0;
-      z-index: 1000;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>The Wedding Quest: Sound Edition</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        :root { 
+            --gold: #d4af37; --deep-purple: #2d0b4d; --cream: #fffdf5; 
+            --success: #1b5e20; --glass: rgba(255, 255, 255, 0.95);
+        }
+        body { 
+            font-family: 'Georgia', serif; background: var(--cream); color: var(--deep-purple);
+            margin: 0; display: flex; flex-direction: column; align-items: center; overflow-x: hidden;
+            background-image: url('https://www.transparenttextures.com/patterns/cream-paper.png');
+        }
+        
+        #overlay, #leaderboard-screen { 
+            position: fixed; inset: 0; background: radial-gradient(circle, var(--deep-purple), #1a052e);
+            z-index: 1000; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--gold);
+        }
 
-    /* ===== Product Styling ===== */
-    .product {
-      display: inline-block;
-      text-align: center;
-      margin: 20px;
-      border: 1px solid #ddd;
-      border-radius: 10px;
-      padding: 10px;
-      width: 300px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      background: #fff;
-    }
+        .royal-card { 
+            background: var(--glass); border: 4px double var(--gold); padding: 30px;
+            border-radius: 25px; width: 85%; max-width: 400px; text-align: center;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.6); color: var(--deep-purple);
+        }
 
-    .product img {
-      width: 100%;
-      height: 350px;
-      border-radius: 10px;
-      object-fit: cover;
-      transition: transform 0.3s ease;
-    }
+        input { 
+            padding: 15px; border-radius: 50px; border: 2px solid var(--gold); 
+            width: 85%; margin: 20px 0; font-size: 1.1rem; text-align: center; background: #fff;
+        }
 
-    .product img:hover {
-      transform: scale(1.03);
-    }
+        .btn { 
+            padding: 14px 35px; border: none; border-radius: 50px; font-weight: bold;
+            cursor: pointer; text-transform: uppercase; letter-spacing: 1.5px; transition: 0.3s;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+        .btn-gold { background: linear-gradient(145deg, #d4af37, #b8860b); color: white; }
+        .btn-gold:active { transform: scale(0.95); }
 
-    .add-to-cart {
-      background-color: maroon;
-      color: white;
-      border: none;
-      padding: 10px 16px;
-      border-radius: 8px;
-      cursor: pointer;
-      margin-top: 10px;
-      transition: 0.3s;
-    }
+        .header { 
+            background: var(--deep-purple); color: var(--gold); width: 100%; 
+            padding: 15px 0; text-align: center; font-size: 1.3rem; border-bottom: 4px solid var(--gold);
+        }
+        .stats-bar { 
+            display: flex; justify-content: space-around; width: 100%; 
+            background: rgba(255,255,255,0.8); padding: 10px 0; font-weight: bold;
+            border-bottom: 1px solid var(--gold); backdrop-filter: blur(5px);
+        }
 
-    .add-to-cart:hover {
-      background-color: darkred;
-      transform: scale(1.05);
-    }
-  </style>
+        .grid { 
+            display: grid; grid-template-columns: repeat(20, 1fr); 
+            gap: 2px; background: var(--gold); padding: 4px; border-radius: 10px;
+            width: 95vw; max-width: 550px; margin: 20px 0; box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        }
+        .cell { 
+            background: white; aspect-ratio: 1; display: flex; align-items: center; 
+            justify-content: center; font-weight: 900; font-size: clamp(10px, 3.2vw, 18px);
+            cursor: pointer; user-select: none; transition: 0.15s; border-radius: 3px;
+        }
+        .cell.selected { background: #ffd54f; color: #000; transform: scale(0.85); box-shadow: inset 0 0 5px rgba(0,0,0,0.2); }
+        .cell.found { background: var(--success) !important; color: white !important; transform: none; }
+        .cell.hint { animation: gold-glow 1s infinite; z-index: 10; }
+
+        @keyframes gold-glow { 0% { background: #fff; } 50% { background: var(--gold); color: white; } 100% { background: #fff; } }
+
+        .word-bank { 
+            display: flex; flex-wrap: wrap; justify-content: center; gap: 6px;
+            width: 90%; padding: 15px; background: rgba(255,255,255,0.6); border-radius: 15px; margin-bottom: 100px;
+        }
+        .word-item { padding: 4px 10px; border: 1px solid var(--gold); border-radius: 15px; font-size: 0.75rem; font-weight: bold; background: white; }
+        .word-item.strikethrough { background: #e0e0e0; color: #999; text-decoration: line-through; border: 1px solid #ccc; }
+
+        .controls { 
+            position: fixed; bottom: 0; width: 100%; background: var(--glass);
+            padding: 15px 0; display: flex; justify-content: center; gap: 10px;
+            border-top: 2px solid var(--gold);
+        }
+    </style>
 </head>
 <body>
 
-  <!-- ===== HEADER ===== -->
-  <header class="header">
-    <div class="logo-left">
-      <img src="logojmb.png" width="60" height="60">
+<div id="overlay">
+    <div class="royal-card">
+        <h1 style="margin: 0; font-style: italic;">💍 The Quest</h1>
+        <p>A Journey Through Names</p>
+        <input type="text" id="guestName" placeholder="Enter Guest Name">
+        <button class="btn btn-gold" onclick="startQuest()">Begin Quest</button>
     </div>
+</div>
 
-    <div class="title-center">
-      <h1>B.F. Fashion</h1>
+<div id="leaderboard-screen" style="display: none;">
+    <div class="royal-card">
+        <h2>🏆 Hall of Fame</h2>
+        <table style="width:100%; text-align: left;">
+            <thead><tr><th>Rank</th><th>Name</th><th>Time</th></tr></thead>
+            <tbody id="lb-body"></tbody>
+        </table>
+        <button class="btn btn-gold" style="margin-top: 20px;" onclick="location.reload()">New Player</button>
     </div>
+</div>
 
-    <div class="cart-right">
-      <a href="cart.html" class="cart-btn">🛒 Cart (<span id="cart-count">0</span>)</a>
-    </div>
-  </header>
+<div class="header">👰 ROYAL WEDDING QUEST 🤵</div>
+<div class="stats-bar">
+    <span>⏳ <span id="timer">00:00</span></span>
+    <span>✨ <span id="score">0</span> / 34</span>
+</div>
 
-  <!-- ===== PRODUCTS ===== -->
-  <main style="text-align:center; margin-top:20px;">
+<div id="grid" class="grid"></div>
+<div id="bank" class="word-bank"></div>
 
-    <!-- Product 1 -->
-    <div class="product">
-      <img id="img1" src="LGBEHAPPY.JPG" alt="GIRL T SHIRT">
-      <h3>GIRL T SHIRT </h3>
-      <p>₹799</p>
-      <button class="add-to-cart" onclick="addToCart('GIRL T SHIRT', 799, 'LGBEHAPPY.JPG')">Add to Cart</button>
-    </div>
+<div class="controls">
+    <button class="btn" style="background:#757575; color:white; font-size:0.7rem;" onclick="giveUp()">Give Up</button>
+    <button class="btn" style="background:#0097a7; color:white; font-size:0.7rem;" onclick="getHint()">Hint</button>
+    <button class="btn btn-gold" style="font-size:0.7rem;" onclick="finishGame()">Submit</button>
+</div>
 
-    <!-- Product 2 -->
-    <div class="product">
-      <img id="img2" src="bj.jpg" alt="Jacket">
-      <h3>Jacket</h3>
-      <p>₹899</p>
-      <button class="add-to-cart" onclick="addToCart('Jacket', 899, 'img2')">Add to Cart</button>
-    </div>
+<script>
+    const nameList = ["POOJA", "PRAVEEN", "GOPAL", "VIVEK", "MOKSH", "DIYA", "SHUBHAM", "AMIT", "MANISHA", "SHIVAM", "KIRTI", "KRISHAN", "PRITI", "JAISHREE", "NARAYAN", "NISHIKA", "GARVIT", "DAKSHU", "YUVAAN", "DIVYANSHI", "CHINI", "VEDANT", "DRISHTI", "VINAY", "SHWETA", "KARISHMA", "SANTOSH", "AARAV", "SAKSHAM", "KAILASH", "JUGAL", "NISHA", "PRABHA", "JYOTI"];
+    const size = 20;
+    let gridData = Array(size).fill().map(() => Array(size).fill(''));
+    let locations = {};
+    let selectedCells = [];
+    let foundWords = new Set();
+    let seconds = 0;
+    let isActive = false;
 
-    <!-- Product 3 -->
-    <div class="product">
-      <img id="img3" src="bnd.jpg" alt="Night dress">
-      <h3>Night Dress Co-Set</h3>
-      <p>₹699</p>
-      <button class="add-to-cart" onclick="addToCart('Night dress Co-set', 699, 'bnd')">Add to Cart</button>
-    </div>
-
-  </main>
-
-  <!-- ===== FOOTER ===== -->
-  <footer style="text-align:center; padding:20px;">
-    Contact us:<br>
-    📞 9374833385 / 7201010785
-  </footer>
-
-  <!-- ===== FLOATING WHATSAPP BUTTON ===== -->
-  <a href="https://wa.me/919316149804" class="whatsapp-float" target="_blank">💬</a>
-
-  <!-- ===== SCRIPT ===== -->
-  <script>
-    // === CART COUNT HANDLER ===
-    let cart = JSON.parse(localStorage.getItem("cart")) || [];
-    const countSpan = document.getElementById("cart-count");
-    countSpan.textContent = cart.length;
-
-    function addToCart(name, price, img) {
-      cart.push({ name, price, img });
-      localStorage.setItem("cart", JSON.stringify(cart));
-      countSpan.textContent = cart.length;
-      alert(name + " added to cart!");
+    // Sounds using Web Audio API (No files needed)
+    let audioCtx;
+    function playNote(freq, type, duration) {
+        if(!audioCtx) return;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
     }
 
-    // === AUTO IMAGE SLIDESHOW WITH PAUSE ON HOVER ===
-    const productSlides = {
-      img1: ["LGBEHAPPY.JPG", "MBEHAPPY.JPG", "NBBEHAPPY.JPG"],
-      img2: ["nbj.jpg", "wj.jpg", "bj.jpg", "pj.jpg", "afj.jpg"],
-      img3: ["lgnd.jpg", "lnds.jpg", "ond.jpg", "pnds.jpg", "wnd.jpg", "mnd.jpg", "bnd.jpg"]
-    };
+    function startQuest() {
+        if(!document.getElementById('guestName').value) return alert("Please enter your name!");
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        document.getElementById('overlay').style.display = 'none';
+        isActive = true;
+        setInterval(() => { if(isActive) { seconds++; updateTime(); } }, 1000);
+    }
 
-    const intervals = {};
+    function updateTime() {
+        const m = Math.floor(seconds/60).toString().padStart(2,'0');
+        const s = (seconds%60).toString().padStart(2,'0');
+        document.getElementById('timer').textContent = `${m}:${s}`;
+    }
 
-    function startSlides() {
-      for (const id in productSlides) {
-        let i = 0;
-        const img = document.getElementById(id);
-        intervals[id] = setInterval(() => {
-          i = (i + 1) % productSlides[id].length;
-          img.src = productSlides[id][i];
-        }, 3000);
-
-        // Pause on hover
-        img.addEventListener("mouseenter", () => clearInterval(intervals[id]));
-        img.addEventListener("mouseleave", () => {
-          intervals[id] = setInterval(() => {
-            i = (i + 1) % productSlides[id].length;
-            img.src = productSlides[id][i];
-          }, 3000);
+    function init() {
+        nameList.sort((a,b) => b.length - a.length);
+        nameList.forEach(word => {
+            let placed = false;
+            let attempts = 0;
+            while(!placed && attempts < 500) {
+                const dir = [[0,1],[1,0],[1,1],[1,-1],[0,-1],[-1,0],[-1,-1],[-1,1]][Math.floor(Math.random()*8)];
+                const r = Math.floor(Math.random()*size), c = Math.floor(Math.random()*size);
+                if(r+dir[0]*word.length >= 0 && r+dir[0]*word.length < size && c+dir[1]*word.length >= 0 && c+dir[1]*word.length < size) {
+                    let ok = true;
+                    for(let i=0; i<word.length; i++) if(gridData[r+dir[0]*i][c+dir[1]*i] && gridData[r+dir[0]*i][c+dir[1]*i] !== word[i]) ok = false;
+                    if(ok) {
+                        locations[word] = [];
+                        for(let i=0; i<word.length; i++) {
+                            gridData[r+dir[0]*i][c+dir[1]*i] = word[i];
+                            locations[word].push(`${r+dir[0]*i}-${c+dir[1]*i}`);
+                        }
+                        placed = true;
+                    }
+                }
+                attempts++;
+            }
         });
-      }
+        const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        for(let r=0; r<size; r++) for(let c=0; c<size; c++) if(!gridData[r][c]) gridData[r][c] = alphabet[Math.floor(Math.random()*26)];
+        
+        const gridEl = document.getElementById('grid');
+        gridData.forEach((row, r) => row.forEach((char, c) => {
+            const div = document.createElement('div');
+            div.className = 'cell'; div.textContent = char; div.id = `${r}-${c}`;
+            div.onclick = () => {
+                if(!isActive || div.classList.contains('found')) return;
+                playNote(400, 'sine', 0.1); // Selection Click
+                div.classList.toggle('selected');
+                if(div.classList.contains('selected')) selectedCells.push(div);
+                else selectedCells = selectedCells.filter(x => x !== div);
+                checkMatch();
+            };
+            gridEl.appendChild(div);
+        }));
+
+        const bank = document.getElementById('bank');
+        nameList.sort().forEach(w => {
+            const span = document.createElement('span');
+            span.className = 'word-item'; span.textContent = w; span.id = `w-${w}`;
+            bank.appendChild(span);
+        });
     }
 
-    startSlides();
-  </script>
-</body>
+    function checkMatch() {
+        const str = selectedCells.map(c => c.textContent).join('');
+        const rev = str.split('').reverse().join('');
+        const match = nameList.find(w => (w === str || w === rev) && !foundWords.has(w));
+        if(match) {
+            playNote(600, 'triangle', 0.3); setTimeout(() => playNote(800, 'triangle', 0.5), 100); // Win Sound
+            confetti({ particleCount: 150, spread: 70, origin: { y: 0.8 } });
+            selectedCells.forEach(c => { c.classList.remove('selected'); c.classList.add('found'); });
+            foundWords.add(match);
+            document.getElementById(`w-${match}`).classList.add('strikethrough');
+            selectedCells = [];
+            document.getElementById('score').textContent = foundWords.size;
+            if(foundWords.size === 34) finishGame();
+        }
+    }
 
+    function getHint() {
+        const rem = nameList.filter(w => !foundWords.has(w));
+        const w = rem[Math.floor(Math.random()*rem.length)];
+        const el = document.getElementById(locations[w][0]);
+        el.classList.add('hint');
+        setTimeout(() => el.classList.remove('hint'), 2000);
+    }
+
+    function giveUp() {
+        isActive = false;
+        nameList.forEach(w => locations[w].forEach(id => document.getElementById(id).classList.add('hint')));
+    }
+
+    function finishGame() {
+        isActive = false;
+        const name = document.getElementById('guestName').value;
+        const timeStr = document.getElementById('timer').textContent;
+        let lb = JSON.parse(localStorage.getItem('wedLB') || '[]');
+        lb.push({name, seconds, timeStr, score: foundWords.size});
+        lb.sort((a,b) => b.score - a.score || a.seconds - b.seconds);
+        localStorage.setItem('wedLB', JSON.stringify(lb.slice(0, 10)));
+        
+        document.getElementById('lb-body').innerHTML = lb.map((s, i) => `<tr><td>${i+1}</td><td>${s.name}</td><td>${s.timeStr}</td></tr>`).join('');
+        document.getElementById('leaderboard-screen').style.display = 'flex';
+        confetti({ particleCount: 500, spread: 150 });
+    }
+
+    init();
+</script>
+</body>
 </html>
